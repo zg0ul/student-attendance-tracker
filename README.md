@@ -109,11 +109,54 @@ works over HTTPS, which Coolify gives you automatically.
 > Redeploys are safe — migrations and seeding are idempotent and won't touch
 > existing data or recreate the admin.
 
-**Migrate fails with `EAI_AGAIN` or `ENOTFOUND`?** The app cannot resolve the
-Postgres hostname. Re-copy the **internal** connection string from the database
-resource (not the public URL), confirm the database is running, link it to the
-app as in step 4, and redeploy. If you recreated the database, its hostname
-changed — update `DATABASE_URL` to match.
+**Migrate fails with `EAI_AGAIN` or `ENOTFOUND`?** The app container cannot
+resolve the Postgres hostname on Docker's internal DNS. Work through this list:
+
+1. **Same project and environment** — the app and Postgres must live in the same
+   Coolify project *and* the same environment (e.g. both in `production`). Coolify
+   does not route DNS across projects or environments.
+2. **Same server / destination** — both resources must be deployed to the same
+   Coolify server and destination (check each resource's *Server* and
+   *Destination* settings).
+3. **Build pack matters**
+   - **Dockerfile** (step 2 above): should join the shared Coolify network
+     automatically. If DNS still fails, open the app → **Advanced** → enable
+     **Connect to Predefined Network** → redeploy.
+   - **Docker Compose**: each stack gets its own isolated network by default.
+     Either enable **Connect to Predefined Network** on the app *and* use the
+     standalone Postgres internal URL, **or** switch to the bundled compose
+     option below (simpler).
+4. **Re-copy `DATABASE_URL`** from the Postgres resource's **internal** URL (not
+   public). If you recreated the database, the hostname changed.
+5. **Verify on the server** (SSH into the Coolify host):
+   ```bash
+   docker ps --format '{{.Names}}' | grep -E 'postgresql|attendance'
+   docker network inspect coolify -f '{{range .Containers}}{{.Name}} {{end}}'
+   ```
+   Both the app and Postgres container names should appear on the `coolify`
+   network. If the app is missing, enable **Connect to Predefined Network** and
+   redeploy.
+
+### Coolify alternative: bundled Postgres (avoids cross-resource DNS)
+
+If standalone Postgres keeps failing with `EAI_AGAIN`, deploy app + database as
+one Docker Compose stack instead:
+
+1. *New Resource → Application → your Git repo*
+2. **Build Pack = Docker Compose**
+3. **Docker Compose location** = `docker-compose.coolify.yml`
+4. **Port** on the `app` service = `3000`
+5. Set environment variables (no `DATABASE_URL` needed — compose sets it):
+   ```
+   POSTGRES_PASSWORD=<strong password>
+   BETTER_AUTH_URL=https://attendance.example.edu
+   SHARED_SECRET=<openssl rand -hex 32>
+   BETTER_AUTH_SECRET=<openssl rand -hex 32>
+   ADMIN_NAME=Dr. Your Name
+   ADMIN_EMAIL=you@ju.edu.jo
+   ADMIN_PASSWORD=<a strong password>
+   ```
+6. Deploy. The app reaches Postgres at hostname `db` on the compose network.
 
 ## Deploy with Docker Compose (alternative, any VPS)
 
