@@ -3,7 +3,10 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# --include=dev forces devDependencies even when NODE_ENV=production (Coolify
+# injects that at build time). Build needs tailwind/postcss; runtime needs tsx +
+# drizzle-kit for migrate/seed.
+RUN npm ci --include=dev
 
 FROM node:22-alpine AS build
 WORKDIR /app
