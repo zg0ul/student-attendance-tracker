@@ -1,0 +1,5 @@
+# Automatic HTTPS when DOMAIN is a real hostname; plain :80 for local testing.
+# HTTPS is required in production — browser geolocation only works over HTTPS.
+{$DOMAIN} {
+	reverse_proxy app:3000
+}
