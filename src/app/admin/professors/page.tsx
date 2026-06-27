@@ -1,6 +1,7 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/schema";
+import { PageHeader } from "@/components/page-header";
 import { ProfessorsClient } from "./professors-client";
 
 export default async function ProfessorsPage() {
@@ -16,8 +17,12 @@ export default async function ProfessorsPage() {
     .orderBy(asc(user.name));
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Professors</h1>
+    <div className="space-y-6">
+      <PageHeader title="Professors">
+        Give each professor their own sign-in so they can run their classes. Professors only see the
+        class screen — they can't change settings or see this admin area. Make someone an admin to
+        give them full access. Deactivate an account to block sign-in without deleting their history.
+      </PageHeader>
       <ProfessorsClient
         users={list.map((u) => ({ ...u, role: u.role ?? "professor", banned: !!u.banned }))}
       />

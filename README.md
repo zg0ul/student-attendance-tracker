@@ -45,8 +45,21 @@ npm run dev
 
 Open http://localhost:3000 and sign in with the admin credentials from `.env`.
 
-> `BETTER_AUTH_URL` must match the origin you actually serve from (scheme + host
-> + port). A mismatch causes `Invalid origin` errors on sign-in.
+### Test the QR on a real phone (over Wi-Fi)
+
+The QR points at whatever address you open the app from, and in development the
+app trusts that address automatically — so you can test the full scan flow on a
+phone without deploying:
+
+1. Find your computer's LAN IP (macOS: `ipconfig getifaddr en0`).
+2. On the same Wi-Fi, open `http://<that-ip>:3000` on your computer, sign in,
+   start a class on `/display`.
+3. Scan the projected QR with your phone — it opens `http://<that-ip>:3000/checkin…`
+   and check-in works end to end.
+
+> Note: phone geolocation needs HTTPS. Over plain `http://<ip>` the location
+> check is skipped (check-in still works); the geofence is enforced once deployed
+> over HTTPS.
 
 ### Tests
 
@@ -54,10 +67,45 @@ Open http://localhost:3000 and sign in with the admin credentials from `.env`.
 npm test      # unit tests for the QR token + geofence logic
 ```
 
-## Deployment (self-host VPS, Docker)
+## Deploy with Coolify (recommended)
 
-HTTPS is **required** — browser geolocation only works over HTTPS. Caddy obtains
-a certificate automatically when `DOMAIN` is a real hostname.
+Coolify provides the database, HTTPS, and domain — so you deploy the app image
+directly (no Caddy, no compose). HTTPS is **required**: phone geolocation only
+works over HTTPS, which Coolify gives you automatically.
+
+1. **Add a Postgres database**
+   Coolify → *New Resource → Database → PostgreSQL*. Create it and copy the
+   **internal connection string** (looks like
+   `postgres://postgres:<pwd>@<service-name>:5432/postgres`).
+
+2. **Add the application**
+   *New Resource → Application → your Git repo*. Set **Build Pack = Dockerfile**
+   (the repo's `Dockerfile`). Set the **Port** to `3000`. Attach your domain
+   (e.g. `attendance.example.edu`) and enable HTTPS.
+
+3. **Set environment variables** (Application → Environment):
+   ```
+   DATABASE_URL=<internal connection string from step 1>
+   BETTER_AUTH_URL=https://attendance.example.edu   # your real domain
+   SHARED_SECRET=<openssl rand -hex 32>
+   BETTER_AUTH_SECRET=<openssl rand -hex 32>
+   ADMIN_NAME=Dr. Your Name
+   ADMIN_EMAIL=you@ju.edu.jo
+   ADMIN_PASSWORD=<a strong password>
+   NODE_ENV=production
+   ```
+   (Optional Google Sheets vars from `.env.example` if you want sheet export.)
+
+4. **Deploy.** On first boot the container runs migrations and creates your admin
+   account automatically (visible in the deploy logs: `admin created: …`). Open
+   your domain and sign in.
+
+> Redeploys are safe — migrations and seeding are idempotent and won't touch
+> existing data or recreate the admin.
+
+## Deploy with Docker Compose (alternative, any VPS)
+
+For a plain VPS without Coolify. Caddy handles automatic HTTPS.
 
 1. Point a DNS A-record at the server.
 2. Create `.env` (see `.env.example`). Set:
@@ -67,14 +115,10 @@ a certificate automatically when `DOMAIN` is a real hostname.
    - `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`
    - `POSTGRES_PASSWORD`
    - `DATABASE_URL` is overridden by compose to reach the `db` service.
-3. Bring it up:
+3. `docker compose up -d --build`
 
-```bash
-docker compose up -d --build
-```
-
-The app container runs migrations + seed (idempotent) on start, then serves on
-`:3000` behind Caddy (`:80`/`:443`). Postgres data persists in the `pgdata` volume.
+The app runs migrations + seed on start, served on `:3000` behind Caddy
+(`:80`/`:443`). Postgres data persists in the `pgdata` volume.
 
 ## Running a class
 

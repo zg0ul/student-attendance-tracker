@@ -7,7 +7,7 @@ export default async function CheckinPage({
 }) {
   const { s, p, t } = await searchParams;
   return (
-    <div className="flex flex-1 items-center justify-center bg-slate-100 p-4">
+    <div className="flex min-h-dvh flex-col bg-background">
       <CheckinForm session={s ?? ""} prof={p ?? ""} token={t ?? ""} />
     </div>
   );

@@ -2,6 +2,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { attendance, sessions } from "@/db/schema";
 import { sheetsConfigured } from "@/lib/export";
+import { PageHeader } from "@/components/page-header";
 import { DataClient } from "./data-client";
 
 export default async function DataPage({
@@ -23,8 +24,12 @@ export default async function DataPage({
   ]);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Attendance</h1>
+    <div className="space-y-6">
+      <PageHeader title="Attendance">
+        Every check-in is recorded here. Filter by a specific class, or download everything as a
+        spreadsheet (CSV) to keep or share. Rows marked "Not in roster" are IDs that weren't on your
+        student list — worth a quick look.
+      </PageHeader>
       <DataClient
         rows={rows.map((r) => ({
           id: r.id,
