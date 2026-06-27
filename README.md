@@ -96,12 +96,24 @@ works over HTTPS, which Coolify gives you automatically.
    ```
    (Optional Google Sheets vars from `.env.example` if you want sheet export.)
 
-4. **Deploy.** On first boot the container runs migrations and creates your admin
+4. **Link the database to the application.** In Coolify, open the Postgres
+   resource → **Connect** (or the app's **Linked resources**) and attach it to
+   this app. Without that link the app container is not on the database's Docker
+   network and `DATABASE_URL`'s internal hostname will not resolve (`EAI_AGAIN` /
+   `ENOTFOUND` in migrate logs).
+
+5. **Deploy.** On first boot the container runs migrations and creates your admin
    account automatically (visible in the deploy logs: `admin created: …`). Open
    your domain and sign in.
 
 > Redeploys are safe — migrations and seeding are idempotent and won't touch
 > existing data or recreate the admin.
+
+**Migrate fails with `EAI_AGAIN` or `ENOTFOUND`?** The app cannot resolve the
+Postgres hostname. Re-copy the **internal** connection string from the database
+resource (not the public URL), confirm the database is running, link it to the
+app as in step 4, and redeploy. If you recreated the database, its hostname
+changed — update `DATABASE_URL` to match.
 
 ## Deploy with Docker Compose (alternative, any VPS)
 
