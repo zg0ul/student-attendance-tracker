@@ -8,6 +8,13 @@
       "when": 1782558160476,
       "tag": "0000_fearless_sasquatch",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783278357619,
+      "tag": "0001_outgoing_randall",
+      "breakpoints": true
     }
   ]
 }

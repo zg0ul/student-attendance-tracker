@@ -11,9 +11,9 @@ export default async function SessionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Sessions">
-        A session is a single class on a single day — for example "Day 3, Class 2". Set how many
+        A session is a single class on a single day — for example &ldquo;Day 3, Class 2&rdquo;. Set how many
         days the course runs and how many classes happen each day, and the system creates a numbered
-        slot for each one. You can give a slot a name (like "CV Writing") so it's easy to recognise.
+        slot for each one. You can give a slot a name (like &ldquo;CV Writing&rdquo;) so it&apos;s easy to recognise.
       </PageHeader>
       <SessionsClient days={cfg.days} periods={cfg.periods} sessions={rows} />
     </div>

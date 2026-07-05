@@ -1,0 +1,2 @@
+ALTER TABLE "attendance" ADD COLUMN "department" text;--> statement-breakpoint
+ALTER TABLE "settings" ADD COLUMN "departments" text DEFAULT 'Mechanical, Electrical, Civil, Architecture, Chemical, Mechatronics, Computer, Industrial' NOT NULL;

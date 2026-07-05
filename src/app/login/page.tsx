@@ -66,7 +66,7 @@ function LoginForm() {
           <div className="space-y-1.5">
             <h2 className="font-heading text-2xl font-bold">Sign in</h2>
             <p className="text-sm text-muted-foreground">
-              For professors and course staff. Don't have an account? Ask the course admin to add
+              For professors and course staff. Don&apos;t have an account? Ask the course admin to add
               you.
             </p>
           </div>

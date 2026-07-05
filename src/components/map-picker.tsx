@@ -18,7 +18,10 @@ export function MapPicker({
   const markerRef = useRef<Marker | null>(null);
   // Keep the latest callback without re-initialising the map.
   const onPickRef = useRef(onPick);
-  onPickRef.current = onPick;
+
+  useEffect(() => {
+    onPickRef.current = onPick;
+  }, [onPick]);
 
   useEffect(() => {
     let cancelled = false;

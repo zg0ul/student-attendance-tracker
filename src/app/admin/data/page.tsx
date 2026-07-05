@@ -27,7 +27,7 @@ export default async function DataPage({
     <div className="space-y-6">
       <PageHeader title="Attendance">
         Every check-in is recorded here. Filter by a specific class, or download everything as a
-        spreadsheet (CSV) to keep or share. Rows marked "Not in roster" are IDs that weren't on your
+        spreadsheet (CSV) to keep or share. Rows marked &ldquo;Not in roster&rdquo; are IDs that weren&apos;t on your
         student list — worth a quick look.
       </PageHeader>
       <DataClient
@@ -39,6 +39,7 @@ export default async function DataPage({
           period: r.period,
           studentId: r.studentId,
           studentName: r.studentName,
+          department: r.department,
           professorName: r.professorName,
           distanceM: r.distanceM,
           status: r.status,

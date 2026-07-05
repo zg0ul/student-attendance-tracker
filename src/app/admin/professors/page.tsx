@@ -20,7 +20,7 @@ export default async function ProfessorsPage() {
     <div className="space-y-6">
       <PageHeader title="Professors">
         Give each professor their own sign-in so they can run their classes. Professors only see the
-        class screen — they can't change settings or see this admin area. Make someone an admin to
+        class screen — they can&apos;t change settings or see this admin area. Make someone an admin to
         give them full access. Deactivate an account to block sign-in without deleting their history.
       </PageHeader>
       <ProfessorsClient

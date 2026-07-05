@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { CheckCircle2, GraduationCap, MapPin } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, ChevronDown, GraduationCap, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import type { SessionInfo } from "@/lib/session-info";
 
 function getDeviceId(): string {
   const k = "att_device_id";
@@ -26,32 +28,31 @@ function getPosition(): Promise<{ lat: number; lng: number } | null> {
   });
 }
 
-type Info = {
-  session: number;
-  day: number | null;
-  period: number | null;
-  label: string | null;
-  professorName: string | null;
-};
-
-export function CheckinForm({ session, prof, token }: { session: string; prof: string; token: string }) {
+export function CheckinForm({
+  session,
+  prof,
+  token,
+  info,
+}: {
+  session: string;
+  prof: string;
+  token: string;
+  info: SessionInfo | null;
+}) {
   const [id, setId] = useState("");
-  const [info, setInfo] = useState<Info | null>(null);
+  const [department, setDepartment] = useState("");
   const [state, setState] = useState<"idle" | "submitting" | "done">("idle");
   const [okName, setOkName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!session) return;
-    fetch(`/api/session-info?s=${session}&p=${encodeURIComponent(prof)}`)
-      .then((r) => r.json())
-      .then(setInfo)
-      .catch(() => {});
-  }, [session, prof]);
+  const deptError = error === "Select your department to continue.";
 
   async function submit() {
     if (!id.trim()) {
       setError("Enter your university ID number to continue.");
+      return;
+    }
+    if (!department) {
+      setError("Select your department to continue.");
       return;
     }
     setState("submitting");
@@ -66,6 +67,7 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
           prof,
           token,
           id: id.trim(),
+          department,
           deviceId: getDeviceId(),
           lat: pos?.lat ?? null,
           lng: pos?.lng ?? null,
@@ -91,7 +93,7 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-sm rounded-2xl border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground">
-            This link isn't valid. Scan the live QR code on the classroom screen with your phone
+            This link isn&apos;t valid. Scan the live QR code on the classroom screen with your phone
             camera.
           </p>
         </div>
@@ -108,7 +110,7 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
             <CheckCircle2 className="size-12 text-success" strokeWidth={2.2} />
           </div>
           <div className="space-y-1">
-            <h1 className="font-heading text-2xl font-bold text-success">You're marked present</h1>
+            <h1 className="font-heading text-2xl font-bold text-success">You&apos;re marked present</h1>
             <p className="text-foreground">{okName}</p>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -124,7 +126,7 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
   return (
     <div className="flex flex-1 flex-col">
       {/* Header band */}
-      <header className="brand-gradient px-6 pb-10 pt-8 text-white">
+      <header className="brand-gradient pointer-events-none px-6 pb-10 pt-8 text-white">
         <div className="mx-auto max-w-sm">
           <div className="mb-5 flex items-center gap-2 text-white/80">
             <GraduationCap className="size-5" />
@@ -143,8 +145,14 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
       </header>
 
       {/* Card overlapping the band */}
-      <div className="mx-auto -mt-6 w-full max-w-sm flex-1 px-6">
-        <div className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm">
+      <div className="relative z-10 mx-auto -mt-6 w-full max-w-sm flex-1 px-4 pb-12 sm:px-6">
+        <form
+          className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (state === "idle") submit();
+          }}
+        >
           <div className="space-y-2">
             <label htmlFor="sid" className="text-sm font-medium">
               Your university ID number
@@ -157,11 +165,49 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
               autoFocus
               className="h-14 text-center text-xl tracking-wider"
               value={id}
-              onChange={(e) => setId(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && state === "idle" && submit()}
+              onChange={(e) => {
+                setId(e.target.value);
+                if (error) setError(null);
+              }}
             />
           </div>
-          <Button className="h-14 w-full text-base" onClick={submit} disabled={state !== "idle"}>
+
+          <div className="space-y-2">
+            <label htmlFor="dept" className="text-sm font-medium">
+              Your department
+            </label>
+            <div className="relative">
+              <select
+                id="dept"
+                value={department}
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                  if (error) setError(null);
+                }}
+                aria-invalid={deptError || undefined}
+                className={cn(
+                  "h-14 w-full appearance-none rounded-lg border border-input bg-background px-4 pr-10 text-base outline-none transition-colors",
+                  "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  !department && "text-muted-foreground",
+                  deptError && "border-destructive ring-3 ring-destructive/20",
+                )}
+              >
+                <option value="">Select your department</option>
+                {info?.departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                aria-hidden
+                className="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" className="h-14 w-full text-base" disabled={state !== "idle"}>
             {state === "submitting" ? "Checking you in…" : "Mark me present"}
           </Button>
           {error && (
@@ -171,9 +217,9 @@ export function CheckinForm({ session, prof, token }: { session: string; prof: s
           )}
           <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
             <MapPin className="size-3.5" />
-            Your phone may ask for location — it confirms you're in the room.
+            Your phone may ask for location — it confirms you&apos;re in the room.
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );

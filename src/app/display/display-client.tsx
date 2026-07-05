@@ -90,7 +90,7 @@ export function DisplayClient({
             <div className="space-y-1">
               <h1 className="font-heading text-2xl font-bold">Start a class</h1>
               <p className="text-sm text-muted-foreground">
-                Pick the day and class. We'll put a QR code on screen for students to scan — it
+                Pick the day and class. We&apos;ll put a QR code on screen for students to scan — it
                 refreshes on its own so old screenshots stop working.
               </p>
             </div>

@@ -26,6 +26,7 @@ const SettingsInput = z.object({
   tokenWindowSeconds: z.number().int().min(10),
   tokenGraceWindows: z.number().int().min(0),
   maxCheckinsPerDevice: z.number().int().min(1),
+  departments: z.string().min(1, "Departments cannot be empty."),
 });
 
 export async function updateSettings(input: z.infer<typeof SettingsInput>): Promise<Result> {

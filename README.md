@@ -178,7 +178,7 @@ The app runs migrations + seed on start, served on `:3000` behind Caddy
 ## Running a class
 
 1. Professor opens `/display`, picks Day + Class, clicks **Show QR**.
-2. Students scan with their phone camera, enter Student ID, tap **Mark me present**.
+2. Students scan with their phone camera, enter Student ID, choose their department, tap **Mark me present**.
 3. The live counter updates; the QR auto-refreshes.
 
 ## Admin panel (`/admin`)
@@ -189,7 +189,7 @@ The app runs migrations + seed on start, served on `:3000` behind Caddy
 - **Roster** — import `StudentID,Name` (CSV or paste); existing IDs are updated.
 - **Sessions** — set days × classes (regenerates the grid) and label sessions.
 - **Settings** — geofence on/off, classroom lat/lng (or "use my location"),
-  radius, QR rotation window, grace windows, max check-ins per device.
+  radius, QR rotation window, grace windows, max check-ins per device, department list for check-in.
 
 ### Optional: Google Sheets export
 
@@ -206,5 +206,5 @@ Sheet" overwrites the sheet with the current export.
 
 ## Columns exported
 
-`Timestamp · Session Number · Day · Period · Student ID · Student Name ·
+`Timestamp · Session Number · Day · Period · Student ID · Student Name · Department ·
 Professor · Device ID · Distance (m) · Status`

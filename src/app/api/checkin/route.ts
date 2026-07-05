@@ -4,6 +4,7 @@ import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { attendance, students, user, sessions } from "@/db/schema";
 import { getSettings } from "@/lib/settings";
+import { isAllowedDepartment, parseDepartments } from "@/lib/departments";
 import { tokenValid } from "@/lib/token";
 import { distMeters } from "@/lib/geo";
 
@@ -11,10 +12,11 @@ const Body = z.object({
   session: z.coerce.number().int().positive(),
   prof: z.string().min(1),
   token: z.string().min(1),
-  id: z.string().trim().min(1),
-  deviceId: z.string().min(1),
+  id: z.string().trim().min(1).max(32),
+  deviceId: z.string().min(1).max(128),
   lat: z.number().nullable().optional(),
   lng: z.number().nullable().optional(),
+  department: z.string().trim().min(1).max(100),
 });
 
 function fail(code: string, msg: string) {
@@ -26,13 +28,18 @@ export async function POST(req: NextRequest) {
   try {
     parsed = Body.parse(await req.json());
   } catch {
-    return fail("BAD_REQUEST", "Please enter your Student ID.");
+    return fail("BAD_REQUEST", "Please enter your Student ID and select your department.");
   }
-  const { session, prof, token, id, deviceId, lat, lng } = parsed;
+  const { session, prof, token, id, deviceId, lat, lng, department } = parsed;
   const cfg = await getSettings();
 
   if (!tokenValid(session, prof, token, cfg.tokenWindowSeconds, cfg.tokenGraceWindows)) {
     return fail("EXPIRED", "This QR code has expired. Scan the live code on screen again.");
+  }
+
+  const allowedDepartments = parseDepartments(cfg.departments);
+  if (!isAllowedDepartment(department, allowedDepartments)) {
+    return fail("BAD_REQUEST", "Please select a valid department.");
   }
 
   // Geofence (matches Code.gs: compute distance when coords present; reject only
@@ -90,6 +97,7 @@ export async function POST(req: NextRequest) {
         deviceId,
         distanceM,
         status,
+        department,
       });
     });
   } catch (err) {

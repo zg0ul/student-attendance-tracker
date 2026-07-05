@@ -99,6 +99,7 @@ export const attendance = pgTable(
     deviceId: text("device_id"),
     distanceM: integer("distance_m"),
     status: text("status").notNull(), // 'OK' | 'NOT_IN_ROSTER'
+    department: text("department"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [unique("uniq_session_student").on(t.sessionNumber, t.studentId)],
@@ -116,6 +117,11 @@ export const settings = pgTable("settings", {
   maxCheckinsPerDevice: integer("max_checkins_per_device").notNull().default(1),
   days: integer("days").notNull().default(10),
   periods: integer("periods").notNull().default(3),
+  departments: text("departments")
+    .notNull()
+    .default(
+      "Mechanical, Electrical, Civil, Architecture, Chemical, Mechatronics, Computer, Industrial"
+    ),
 });
 
 export type Settings = typeof settings.$inferSelect;

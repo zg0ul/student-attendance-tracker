@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { MapPin, QrCode } from "lucide-react";
+import { MapPin, QrCode, GraduationCap } from "lucide-react";
 import type { Settings } from "@/db/schema";
 import { updateSettings } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       tokenWindowSeconds: v.tokenWindowSeconds,
       tokenGraceWindows: v.tokenGraceWindows,
       maxCheckinsPerDevice: v.maxCheckinsPerDevice,
+      departments: v.departments,
     });
     setSaving(false);
     if (res.ok) toast.success("Settings saved");
@@ -88,7 +89,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             <h2 className="font-heading text-lg font-semibold">Classroom location</h2>
             <p className="text-sm text-muted-foreground">
               When this is on, students can only check in if their phone is inside the room. Drop a
-              pin on your classroom below, or open it inside the room and tap "Use my location".
+              pin on your classroom below, or open it inside the room and tap &quot;Use my location&quot;.
             </p>
           </div>
         </div>
@@ -183,6 +184,34 @@ export function SettingsForm({ initial }: { initial: Settings }) {
               type="number"
               value={v.maxCheckinsPerDevice}
               onChange={(e) => num("maxCheckinsPerDevice", e.target.value)}
+            />
+          </Field>
+        </div>
+      </section>
+
+      {/* Departments */}
+      <section className="rounded-xl border bg-card p-5">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+            <GraduationCap className="size-4.5" />
+          </div>
+          <div>
+            <h2 className="font-heading text-lg font-semibold">Departments</h2>
+            <p className="text-sm text-muted-foreground">
+              Configure the list of departments students can select during attendance. Separate each department with a comma.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-xl">
+          <Field
+            label="Department List"
+            hint="E.g., Mechanical, Electrical, Civil, Architecture, Chemical, Mechatronics, Computer, Industrial"
+          >
+            <Input
+              type="text"
+              value={v.departments}
+              onChange={(e) => setV((s) => ({ ...s, departments: e.target.value }))}
             />
           </Field>
         </div>

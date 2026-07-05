@@ -29,6 +29,7 @@ type Row = {
   period: number;
   studentId: string;
   studentName: string | null;
+  department: string | null;
   professorName: string | null;
   distanceM: number | null;
   status: string;
@@ -96,6 +97,7 @@ export function DataClient({
             <TableHead>Session</TableHead>
             <TableHead>Student ID</TableHead>
             <TableHead>Name</TableHead>
+            <TableHead>Department</TableHead>
             <TableHead>Professor</TableHead>
             <TableHead>Dist (m)</TableHead>
             <TableHead>Status</TableHead>
@@ -110,6 +112,7 @@ export function DataClient({
               <TableCell>{r.sessionNumber}</TableCell>
               <TableCell className="font-mono">{r.studentId}</TableCell>
               <TableCell>{r.studentName ?? "—"}</TableCell>
+              <TableCell>{r.department ?? "—"}</TableCell>
               <TableCell>{r.professorName ?? "—"}</TableCell>
               <TableCell>{r.distanceM ?? "—"}</TableCell>
               <TableCell>
